@@ -3,6 +3,7 @@ project:
   output-dir: docs
 
 website:
+  title: "Talia C Swanson's Data Analysis Portfolio"
   title: "Talia C. Swanson's Data Analysis Portfolio"
   navbar:
     left:
