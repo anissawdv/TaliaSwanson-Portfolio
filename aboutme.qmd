@@ -2,6 +2,30 @@
 title: "About me"
 ---
 
-Add some text and a figure describing myself.
+![](Profile.JPEG)
 
-For details, see the instructions. 
+My name is Talia C. Swanson, and I am currently a second-year Master of Public Health (MPH) student in the Epidemiology concentration. I completed my Bachelor of Science in Biology at the University of Georgia this past Summer and am originally from Atlanta, Georgia.
+
+My interest in public health grew through my work IMPACT UGA Alternative Service Breaks, a program that sends students to cities across the Southeast to explore socioeconomic challenges and contribute to intiatives supporting these communities. I participated in trips to Asheboro, NC, focusing on affordable housing, and Charlotte, NC, focusing on education access.
+
+## Research Interests & Goals
+
+My research interests focus on environmental exposures, specifically particulate matter, PM2.5, and how these expsoures contribute to the development of chronic disease. I am also interested in social determinants of health, with an emphasis on how cultural choices and structures influence health outcomes. Currently, I am supporting a Household Air Pollution Intervention Network, (HAPIN), follow-up study examining the effects of PM2.5 exposure from traditional cooking methods on the human microbiome and its relationship to respiratory health.
+
+In addition to my epidemiologic interests, I currently support a project in the ACCESS Lab within the Cellular Biology department that examines undergraduate experiences in STEM, with a focus on how institutional structures and learning environments shape student engagement.
+
+Long term, I hope to study environmental exposures and how they contribute to respiratory and nuerodegenerative disease while pursuing a career in the federal sector.
+
+## Data Analysis Experience
+
+I have taken EPID 7010 and BIOS 7010/7020 that focused on using SAS and Stata to produce survivial models, regression, ANOVA, and T-tests for statistical analysis. Additionally, I have worked on an independet project assessing major depressive episodes in adolescents aged 12-17, examining the factors of culture and racial demographics for multivariate regression modeling using R. For this class, I hope to build on my software and coding skills to become more confident in analyzing data as I hope to incorporate coding into my future career.
+
+## Hobbies
+
+Outside of academics, I really enjpy musical instruments, including the flute, piccolo, and violin. I also enjoy reading in my spare time, particularly fantasy and myth-based genres involving vampires, elves, warlocks, and related themes. I enjoy exploring new foods and recently Pad Thai for the very first time during my study abroad trip to Bangkok!
+
+::: {style="text-align: center;"}
+<img src="1.JPG" alt="Image 1" width="200" style="margin: 5px;"/> <img src="2.JPG" alt="Image 2" width="200" style="margin: 5px;"/> <img src="3.JPG" alt="Image 3" width="200" style="margin: 5px;"/>
+:::
+
+I also included this link to an introduction to spatial statistics using GIS (Geographic Information Systems). I really hope to somehow get into using spatial analysis/I find it interesting! https://www.youtube.com/watch?v=VmWS_gSrCbk
