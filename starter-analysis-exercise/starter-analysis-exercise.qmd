@@ -155,4 +155,69 @@ life_expectancy ~ population will show the relationship between country size and
 
 summary ( ) will provide our descriptive statistics
 
+# This next section is contributed by Emil Joson
 
+The dataset chosen for this section is *greenhouse_gases* (Greenhouse gas concentrations over 2000 years).
+
+
+```{r}
+#Load the dataset
+data(greenhouse_gases)
+
+#Check the dataset
+str(greenhouse_gases)
+summary(greenhouse_gases)
+class(greenhouse_gases)
+unique(greenhouse_gases$gas)
+unique(greenhouse_gases$year)
+```
+
+It looks like this dataset only has three variables: year, gas, and concentrations. Specifically, this dataset contains concentration values of three greenhouse gases (carbon dioxide CO2, methane CH4 and nitrous oxide N2O) from year 20 to 2000.
+
+```{r}
+anyNA(greenhouse_gases)
+```
+
+It also looks like there aren't any missing values in this dataset.
+
+Let's take a quick look at how these gases change over time.
+
+```{r}
+ggplot(greenhouse_gases, aes(x=year, y=concentration, group=gas))+
+     geom_line(aes(color=gas))+
+     theme_bw()
+```
+
+Gas concentrations seemed to have shot up at some point past 1500. Using historical context, let's take a look at the numbers only from 1760-2000 (from the beginning of the industrial revolution).
+
+
+```{r}
+#Subset the data from 1500-2000
+greenhouse_gases1 <- greenhouse_gases[greenhouse_gases$year >= 1760 & greenhouse_gases$year <= 2000,]
+
+#Check the subset
+str(greenhouse_gases1)
+summary(greenhouse_gases1)
+```
+The 1500-2000 subset now has 39 observations as opposed to the original dataset with 300. Let's create the same graph as before, but now using this new subset.
+
+```{r}
+ggplot(greenhouse_gases1, aes(x=year, y=concentration, group=gas))+
+     geom_line(aes(color=gas))+
+     theme_bw()
+```
+
+Focusing on methane, let's create a simple linear model to determine whether how its concentration was compared with time.  
+
+
+```{r}
+#Filter CH4 
+greenhouse_gases2 <- greenhouse_gases1[greenhouse_gases1$gas == "CH4",]
+
+#Use lm function to fit CH4 concentration as the outcome and year as the predictor
+fit3 <- lm(concentration ~ year, data=greenhouse_gases2)
+summary(fit3)
+
+```  
+
+CH4 concentration is strongly positively associated with year (3.641, p=5.93e-05). For each year that went by, CH4 concentration increased by 3.6 units.
