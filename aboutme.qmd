@@ -1,7 +1,8 @@
 ---
 title: "About me"
 ---
-![](Profile.JPEG) 
+
+![](Profile.JPEG)
 
 My name is Talia C. Swanson, and I am currently a second-year Master of Public Health (MPH) student in the Epidemiology concentration. I completed my Bachelor of Science in Biology at the University of Georgia this past Summer and am originally from Atlanta, Georgia.
 
@@ -28,5 +29,3 @@ Outside of academics, I really enjoy musical instruments, including the flute, p
 :::
 
 I also included this link to an introduction to spatial statistics using GIS (Geographic Information Systems). I really hope to somehow get into using spatial analysis/I find it interesting! https://www.youtube.com/watch?v=VmWS_gSrCbk
-
-
