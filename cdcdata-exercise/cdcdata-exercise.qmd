@@ -1,0 +1,213 @@
+# Dataset Description
+The dataset I selected is “Lyme disease public use line-listed data without geographic identifiers (2022–2023)” from the Centers for Disease Control and Prevention (CDC). It is available through the CDC’s open data portal (Data.CDC.gov)
+.
+This dataset contains de-identified, individual-level (line-listed) records of reported Lyme disease cases in the United States for years 2022–2023. Each row represents a single reported case. The dataset includes demographic and clinical variables such as age group, sex, race/ethnicity, and illness onset information. Geographic identifiers (such as state or county) have been removed to protect privacy.
+
+## Source:
+https://data.cdc.gov/National-Center-for-Emerging-and-Zoonotic-Infectio/Lyme-disease-public-use-line-listed-data-without-g/9mtj-y2ba/about_data
+
+
+# Load data and check the columns available 
+```{r}
+library(tidyverse)
+library(here)
+
+# Read the CSV file
+lyme_raw <- read_csv(
+  here("cdcdata-exercise",
+       "Lyme_disease_public_use_line-listed_data_without_geography,_2022-2023_20260212.csv")
+)
+```
+
+
+# Choosing our variables
+The Lyme disease dataset from the CDC, 2022-2023, has fourteen total variables. However, we want to choose at least 5 variable to work with for this exercise. I chose 6 variables as such, "Year", "Sex", "Age_cat_yrs", "Arthritis", "Facial_palsy", "Av_block"
+```{r}
+lyme <- lyme_raw %>% # The six variables we want to use #
+  select(Year,
+         Sex,
+         Age_cat_yrs,
+         Arthritis,
+         Facial_palsy,
+         Av_block) %>%
+  mutate(across(where(is.character), ~na_if(., "Unknown"))) %>%
+  mutate(across(where(is.character), ~na_if(., "UNK"))) %>%
+  mutate(across(where(is.character), as.factor))
+# This above , if the data is unknown it is counted as NA #
+
+glimpse(lyme)
+summary(lyme) # overview of data #
+```
+
+# Summary Statistics for All Six Variables
+With the cleaned six variables from the CDC Lyme disease dataset, we produced summary statistics to describe the data
+
+For the numeric variable "Year", we calculated the minimum, maximum, median, mean, and standard deviation.
+
+For the categorical variables ("Sex", "Age_cat_yrs", "Arthritis", "Facial_palsy", and "Av_block") we calculated the count and percentage of cases in each category.
+
+These summaries provide an overview of the distributions in the dataset and can be used to generate other exploratory data methods.
+```{r}
+library(tidyverse)
+
+# ---- 1. Year (numeric) ----
+year_summary <- tibble(
+  Min = min(lyme$Year, na.rm = TRUE),
+  Max = max(lyme$Year, na.rm = TRUE),
+  Median = median(lyme$Year, na.rm = TRUE),
+  Mean = mean(lyme$Year, na.rm = TRUE),
+  SD = sd(lyme$Year, na.rm = TRUE)
+)
+year_summary
+
+# ---- 2. Sex (categorical) ----
+sex_summary <- lyme %>%
+  count(Sex) %>%
+  mutate(Percent = n / sum(n) * 100)
+sex_summary
+
+# ---- 3. Age Category ----
+age_summary <- lyme %>%
+  count(Age_cat_yrs) %>%
+  mutate(Percent = n / sum(n) * 100)
+age_summary
+
+# ---- 4. Arthritis ----
+arthritis_summary <- lyme %>%
+  count(Arthritis) %>%
+  mutate(Percent = n / sum(n) * 100)
+arthritis_summary
+
+# ---- 5. Facial Palsy ----
+facial_summary <- lyme %>%
+  count(Facial_palsy) %>%
+  mutate(Percent = n / sum(n) * 100)
+facial_summary
+
+# ---- 6. AV Block ----
+av_summary <- lyme %>%
+  count(Av_block) %>%
+  mutate(Percent = n / sum(n) * 100)
+av_summary
+```
+
+# Plotting Our Demographic Data
+
+## Variable "Year"
+Our data currently includes years 2022 and 2023, and we constructed a bar graph to visualize the number of cases in each year. In 2022, there were 62,549 cases while there were 89,469 cases in 2023. Collectively, there were 152,018 cases of Lyme disease.
+```{r}
+ggplot(lyme, aes(x = factor(Year))) +
+  # Bar plot of Cases #
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Distribution of Lyme Disease Cases by Year",
+    x = "Year",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# percentage #
+lyme %>%
+  count(Year) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+
+## Variable "Sex"
+We examined the distribution of cases by sex to understand demographic patterns in the dataset. Counts are displayed to show how cases are distributed between males and females.
+```{r}
+ggplot(lyme, aes(x = Sex)) +
+  # Bar plot of Sex #
+  geom_bar(fill = "darkorange") +
+  labs(
+    title = "Distribution of Cases by Sex",
+    x = "Sex",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# percentage #
+lyme %>%
+  count(Sex) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+
+## Variable "Age"
+To evaluate the age distribution of reported cases, we summarized the number of cases within each age category. This allows us to identify which age groups are most represented in the dataset.
+```{r}
+ggplot(lyme, aes(x = Age_cat_yrs)) +
+  # Bar graph of Age #
+  geom_bar(fill = "purple") +
+  labs(
+    title = "Distribution of Cases by Age Category",
+    x = "Age Category (Years)",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# percentage #
+lyme %>%
+  count(Age_cat_yrs) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+
+```
+
+# Plotting Our Clinical Variables
+
+## Variable "Arthritis"
+We summarized the presence of reported clinical features, such as arthritis, to determine how frequently these symptoms were recorded in the dataset. 
+```{r}
+ggplot(lyme, aes(x = Arthritis)) +
+  # Bar Plot of Arthritis #
+  geom_bar(fill = "firebrick") +
+  labs(
+    title = "Cases with Arthritis",
+    x = "Arthritis",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# percentage #
+lyme %>%
+  count(Arthritis) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+
+```
+
+## Variable "Facial Palsy"
+We examined the frequency of reported facial palsy among Lyme disease cases. This helps assess how commonly this in the dataset and whether it is a rare or frequently documented clinical feature among the Lyme cases for 2022-2023.
+```{r}
+ggplot(lyme, aes(x = Facial_palsy)) +
+  # Bar Plot of Facial Palsy  #
+  geom_bar(fill = "seagreen") +
+  labs(
+    title = "Cases with Facial Palsy",
+    x = "Facial Palsy",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# percentage #
+lyme %>%
+  count(Facial_palsy) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+
+```
+
+## Variable "AV Block"
+We summarized the presence of atrioventricular (AV) block among reported cases to understand how frequently this occurs within the dataset among Lyme cases for 2022-2023.
+```{r}
+ggplot(lyme, aes(x = Av_block)) +
+  # Bar Plot of AV Block #
+  geom_bar(fill = "brown") +
+  labs(
+    title = "Cases with AV Block",
+    x = "AV Block",
+    y = "Count"
+  ) +
+  theme_minimal()
+# percentage #
+lyme %>%
+  count(Av_block) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```

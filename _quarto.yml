@@ -1,4 +1,5 @@
-project: 
+---
+project:
   type: website
   output-dir: docs
 
@@ -14,12 +15,15 @@ website:
             file: starter-analysis-exercise/starter-analysis-exercise.qmd
           - text: "READy Exercise"
             file: ready-exercise/ready-exercise.html
+          - text: "Data Analysis Exercise"
+            file: cdcdata-exercise/cdcdata-exercise.qmd
     right:
-      - icon: github 
-        href: https://github.com/taliacswanson/TaliaSwanson-Portfolio       
+      - icon: github
+        href: https://github.com/taliacswanson/TaliaSwanson-Portfolio
 format:
   html:
     theme: cosmo
     highlight: zenburn
     css: styles.css
-    toc: FALSE
+    toc: false
+
