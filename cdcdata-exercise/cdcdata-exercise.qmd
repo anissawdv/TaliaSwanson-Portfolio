@@ -211,3 +211,336 @@ lyme %>%
   count(Av_block) %>%
   mutate(percent = round(n / sum(n) * 100, 1))
 ```
+
+# Synthetic Data Generation
+This section was contributed by Anissa Waller Del Valle. 
+
+```{r}
+set.seed(123)
+# This will fx the random number generator, ensuring that I will get the same synthetic dataset. 
+
+n <- nrow(lyme)
+# This will ensure that the synthetic dataset matches the size of the original dataset. 
+``` 
+```{r}
+# Create a new, synthetic dataset. 
+synthetic_lyme <- tibble(
+
+  # Generate synthetic data for year. 
+Year = sample(
+  x = as.numeric(names(prop.table(table(lyme$Year)))),
+  size = n,
+  replace = TRUE,
+  prob = prop.table(table(lyme$Year))
+),
+  
+  # Generate synthetic data for sex.
+  Sex = sample(
+    levels(lyme$Sex),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lyme$Sex))
+  ),
+  
+  # Generate synthetic data for age category. 
+  Age_cat_yrs = sample(
+    levels(lyme$Age_cat_yrs),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lyme$Age_cat_yrs))
+  ),
+  
+  # Generate synthetic data for arthritis. 
+  Arthritis = sample(
+    levels(lyme$Arthritis),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lyme$Arthritis))
+  ),
+  
+  # Generate synthetic data for facial palsy
+  Facial_palsy = sample(
+    levels(lyme$Facial_palsy),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lyme$Facial_palsy))
+  ),
+  
+  # Generate synthetic data for AV block. 
+  Av_block = sample(
+    levels(lyme$Av_block),
+    size = n,
+    replace = TRUE,
+    prob = prop.table(table(lyme$Av_block))
+  )
+)
+```
+```{r}
+# Convert to factors for downstream analysis. 
+synthetic_lyme <- synthetic_lyme %>%
+  mutate(across(where(is.character), as.factor))
+
+#Explore the data. 
+glimpse(synthetic_lyme)
+```
+
+The synthetic dataset has the same numeber of rows and columns as the original dataset. This means that the dataset size has been preserved. Now, I will verify that the distributions match. 
+
+```{r}
+lyme %>%
+  count(Year) %>%
+  mutate(original_percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Year) %>%
+  mutate(synthetic_percent = n / sum(n) * 100)
+
+lyme %>%
+  count(Sex) %>%
+  mutate(original_percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Sex) %>%
+  mutate(synthetic_percent = n / sum(n) * 100)
+
+lyme %>%
+  count(Age_cat_yrs) %>%
+  mutate(original_percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Age_cat_yrs) %>%
+  mutate(synthetic_percent = n / sum(n) * 100)
+
+lyme %>%
+  count(Arthritis) %>%
+  mutate(original_percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Arthritis) %>%
+  mutate(synthetic_percent = n / sum(n) * 100)
+
+lyme %>%
+  count(Facial_palsy) %>%
+  mutate(original_percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Facial_palsy) %>%
+  mutate(synthetic_percent = n / sum(n) * 100)
+
+lyme %>%
+  count(Av_block) %>%
+  mutate(original_percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Av_block) %>%
+  mutate(synthetic_percent = n / sum(n) * 100)
+```
+
+The synthetic dataset should mirror the distributions of the original dataset across all demographic and clinical variables. The percent differences between the original and synthetic porportions should be minimal and reflect random variation due to sampling. 
+
+The synthetic dataset is working correctly for year, sex, and age category variables. It is not working for the clinical variables, as the code I wrote prior did excluded NA variables. I will rewrite the code for those variables. 
+
+```{r}
+# Note that ChatGPTn 5.2 was used to help determine why the synthetic data was not working for clinical variables. Troubleshooting purposes only. 
+# First, create probability tables for the clinical varibles including observations coded as NA. 
+
+arthritis_probs <- prop.table(table(lyme$Arthritis, useNA = "ifany"))
+facial_probs    <- prop.table(table(lyme$Facial_palsy, useNA = "ifany"))
+av_probs        <- prop.table(table(lyme$Av_block, useNA = "ifany"))
+```
+```{r}
+# Re-sample synthetic values, including observations coded as NA. 
+synthetic_lyme <- synthetic_lyme %>%
+  mutate(
+    Arthritis = sample(
+      x = names(arthritis_probs),
+      size = n(),
+      replace = TRUE,
+      prob = arthritis_probs
+    ),
+    Facial_palsy = sample(
+      x = names(facial_probs),
+      size = n(),
+      replace = TRUE,
+      prob = facial_probs
+    ),
+    Av_block = sample(
+      x = names(av_probs),
+      size = n(),
+      replace = TRUE,
+      prob = av_probs
+    )
+  ) %>%
+  # Convert "NA" strings back to real NA
+  mutate(across(c(Arthritis, Facial_palsy, Av_block), ~na_if(., "NA"))) %>%
+  # Ensure factors
+  mutate(across(c(Arthritis, Facial_palsy, Av_block), as.factor))
+
+# Check the data. 
+glimpse(synthetic_lyme)
+```
+
+I can see that the synthetic data now includes observations coded as NA. I will check if the distributions match. 
+
+```{r}
+synthetic_lyme %>%
+  count(Arthritis) %>%
+  mutate(percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Facial_palsy) %>%
+  mutate(percent = n / sum(n) * 100)
+
+synthetic_lyme %>%
+  count(Av_block) %>%
+  mutate(percent = n / sum(n) * 100)
+```
+
+The percentages closely match the original dataset. 
+
+# Exploring the Synthetic Data
+
+I will generate summary statistics for all 6 variables, similar to what Talia Swanson had done. 
+```{r}
+# Year.
+year_summary <- tibble(
+  Min = min(synthetic_lyme$Year, na.rm = TRUE),
+  Max = max(synthetic_lyme$Year, na.rm = TRUE),
+  Median = median(synthetic_lyme$Year, na.rm = TRUE),
+  Mean = mean(synthetic_lyme$Year, na.rm = TRUE),
+  SD = sd(synthetic_lyme$Year, na.rm = TRUE)
+)
+year_summary
+
+# Sex. 
+sex_summary <- synthetic_lyme %>%
+  count(Sex) %>%
+  mutate(Percent = n / sum(n) * 100)
+sex_summary
+
+# Age Category. 
+age_summary <- synthetic_lyme %>%
+  count(Age_cat_yrs) %>%
+  mutate(Percent = n / sum(n) * 100)
+age_summary
+
+# Arthritis. 
+arthritis_summary <- synthetic_lyme %>%
+  count(Arthritis) %>%
+  mutate(Percent = n / sum(n) * 100)
+arthritis_summary
+
+# Facial Palsy. 
+facial_summary <- synthetic_lyme %>%
+  count(Facial_palsy) %>%
+  mutate(Percent = n / sum(n) * 100)
+facial_summary
+
+# AV Block. 
+av_summary <- synthetic_lyme %>%
+  count(Av_block) %>%
+  mutate(Percent = n / sum(n) * 100)
+av_summary
+```
+
+Now, I will replicate the plots for the synthetic dataset. I will keep the same colors, titles, and formatting so it matches the original style. 
+
+```{r}
+# Year.
+ggplot(synthetic_lyme, aes(x = factor(Year))) +
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Distribution of Synthetic Lyme Disease Cases by Year",
+    x = "Year",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Percentage table
+synthetic_lyme %>%
+  count(Year) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+```{r}
+# Sex.
+ggplot(synthetic_lyme, aes(x = Sex)) +
+  geom_bar(fill = "darkorange") +
+  labs(
+    title = "Distribution of Synthetic Cases by Sex",
+    x = "Sex",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Percentage table
+synthetic_lyme %>%
+  count(Sex) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+```{r}
+# Age categories. 
+ggplot(synthetic_lyme, aes(x = Age_cat_yrs)) +
+  geom_bar(fill = "purple") +
+  labs(
+    title = "Distribution of Synthetic Cases by Age Category",
+    x = "Age Category (Years)",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Percentage table
+synthetic_lyme %>%
+  count(Age_cat_yrs) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+```{r}
+# Arthritis. 
+ggplot(synthetic_lyme, aes(x = Arthritis)) +
+  geom_bar(fill = "firebrick") +
+  labs(
+    title = "Synthetic Cases with Arthritis",
+    x = "Arthritis",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Percentage table
+synthetic_lyme %>%
+  count(Arthritis) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+```{r}
+# Facial palsy. 
+ggplot(synthetic_lyme, aes(x = Facial_palsy)) +
+  geom_bar(fill = "seagreen") +
+  labs(
+    title = "Synthetic Cases with Facial Palsy",
+    x = "Facial Palsy",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Percentage table
+synthetic_lyme %>%
+  count(Facial_palsy) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+```{r}
+# AV Block. 
+ggplot(synthetic_lyme, aes(x = Av_block)) +
+  geom_bar(fill = "brown") +
+  labs(
+    title = "Synthetic Cases with AV Block",
+    x = "AV Block",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Percentage table
+synthetic_lyme %>%
+  count(Av_block) %>%
+  mutate(percent = round(n / sum(n) * 100, 1))
+```
+
+The synthetic dataset preserves the same structure and size of the original dataset, focusing in on six variables: year, sex, age category, arthritis, facial palsy, and AV block. All variables mirror the original distributions. Summary tables and bar plots confirm that the synthetic data reflects the patterns of the original dataset. 
